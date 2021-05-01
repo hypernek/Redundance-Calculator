@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Redundance/.ipynb_checkpoints
+
+# ignore data files
+.csv
