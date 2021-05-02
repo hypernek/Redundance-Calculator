@@ -65,7 +65,7 @@ void countRedundancy()
 			std::string input_w;
 			std::cout << std::endl <<  "Enter limits to which you want to count R(n) in the given basis,"
 				<< std::endl << "Alternatively, enter * if you want to count R(n) by length of representation,"
-				<< std::endl << "Enter % to change to switch to a different basis" << std::endl;
+				<< std::endl << "or enter % to reset and enter coefficients of a different basis" << std::endl;
 			std::cout << "Enter bottom limit:" << std::endl;
 			std::getline(std::cin, input_w);
 			if (input_w == "%")
@@ -195,7 +195,7 @@ void countMaxima()
 		{
 			std::string input_w;
 			std::cout << "\nEnter lengths on which you want to count maxima of R(n) in the given basis"
-				<< std::endl << "Alternatively, enter % if you want to switch to a different basis" << std::endl;
+				<< std::endl << "Alternatively, enter % if you want to reset and switch to a different basis" << std::endl;
 			std::cout << "Enter minimal length:" << std::endl;
 			std::getline(std::cin, input_w);
 			if (input_w == "%")
@@ -225,7 +225,7 @@ void countMaxima()
 					ss >> maxLength;
 
 					input_w.clear();
-					std::cout << "Enter maximum number of maxima saved to output file (-1 = unlimited):" << std::endl;
+					std::cout << "Enter highest number of maxima of R(n) to be saved to output file (-1 = unlimited):" << std::endl;
 					std::getline(std::cin, input_w);
 					if (input_w == "%")
 					{

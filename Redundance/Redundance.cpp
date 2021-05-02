@@ -318,14 +318,14 @@ void calculateR_nToDiscOnLengths(int representationLengthMin, int representation
 	BRepresentation::addElementsByIndex(representationLengthMax + 1);
 	// prepare bounds 
 	// (largest number of desired length & largest number of desired length-1)
-	for (int L = representationLengthMin; L <= representationLengthMax; L++)
-	{
-		std::cout << std::endl << std::endl << "STARTING R(n) ON LENGTH " << L <<
-			" (TOTAL RANGE: " << representationLengthMin << "-" << representationLengthMax << ")" << std::endl;
-		BRepresentation botBound  = BRepresentation(BRepresentation::getSequenceElement(L - 1) - 1);
-		BRepresentation topBound = BRepresentation(BRepresentation::getSequenceElement(L) - 1);
-		calculateR_nToDiscOnBounds(botBound, topBound);
-	}
+	std::cout << std::endl << std::endl << "STARTING CALCULATION OF R(n) ON LENGTHS " << representationLengthMin << "-" << representationLengthMax << std::endl;
+	BRepresentation botBound;
+	if (representationLengthMin > 1)
+		botBound = BRepresentation(BRepresentation::getSequenceElement(representationLengthMin - 1));
+	else
+		botBound = BRepresentation(0); // we count zero as representation of length 1
+	BRepresentation topBound = BRepresentation(BRepresentation::getSequenceElement(representationLengthMax) - 1);
+	calculateR_nToDiscOnBounds(botBound, topBound);
 }
 
 
