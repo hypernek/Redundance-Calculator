@@ -1,5 +1,5 @@
 # Redundance-Calculator
-A calculator of the function *R(n)* in linear numeration systems. 
+A calculator of the function *R(n)* that counts the number of representations of a natural number *n* in a give linear numeration system. 
 
 ## Usage Instructions
 
