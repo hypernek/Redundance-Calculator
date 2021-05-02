@@ -389,7 +389,11 @@ void calculateR_nMaxima(int representationLengthMin, int representationLengthMax
 		std::cout << std::endl << std::endl << "STARTING R(n) ON LENGTH " << L <<
 			" (TOTAL RANGE: "<< representationLengthMin << "-" << representationLengthMax << ")" << std::endl;
 		BRepresentation topBound = BRepresentation(BRepresentation::getSequenceElement(L) - 1);
-		BRepresentation botBound = BRepresentation(BRepresentation::getSequenceElement(L - 1) - 1);
+		BRepresentation botBound;
+		if (L > 1)
+			botBound = BRepresentation(BRepresentation::getSequenceElement(L - 1));
+		else
+			botBound = BRepresentation(0);
 		size_t arraySize = topBound.toLongLong() - botBound.toLongLong() + size_t(1);
 
 		// start clock
