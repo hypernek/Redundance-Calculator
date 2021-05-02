@@ -17,8 +17,25 @@ arrayNumberType* calculateR_nArray(const BRepresentation& botBound, const BRepre
 	double arraySizeMB = arraySize * sizeof(arrayNumberType) * 0.000001;
 
 	// watch out for minimum bound, so that we don't miss any representation of botBound
-	size_t startValue = BRepresentation::getSequenceElement(botBound.getSize() - 1);
-	BRepresentation minBound = BRepresentation(startValue);
+	// this needed because for general botBound there can exist representations 
+	// that are radix smaller but larger in value than botBound
+	// thus, starting at the representation botBound we would omit them
+	// however if botbound is equal to B_k - 1 for some k, any radix smaller representation is also smaller in value
+	// (see Lemma 3.4)
+	size_t startValue;
+	BRepresentation actualMinBound;
+	if (minWantedValue != BRepresentation::getSequenceElement(botBound.getSize()) - 1)
+	{
+		startValue = BRepresentation::getSequenceElement(botBound.getSize() - 1) - 1;
+		actualMinBound = BRepresentation(startValue);
+	}
+	else
+	{
+		startValue = minWantedValue;
+		actualMinBound = botBound;
+	}
+
+	
 
 	std::cout << "R(n) will be calculated on these values:" << std::endl;
 	std::cout << "bottom bound B-representation: " << botBound << std::endl;
@@ -26,7 +43,7 @@ arrayNumberType* calculateR_nArray(const BRepresentation& botBound, const BRepre
 	std::cout << "minimum wanted n (DEC): " << minWantedValue << std::endl;
 	std::cout << "maximum wanted n (DEC): " << maxWantedValue << std::endl;
 	std::cout << "minimum n we have to check (DEC): " << startValue << std::endl;
-	std::cout << "B-representation of this minimum: " << minBound << std::endl;
+	std::cout << "B-representation of this minimum: " << actualMinBound << std::endl;
 	std::cout << "array size: " << arraySize << " values ~ " << arraySizeMB << " MB of memory" << std::endl;
 
 	// allocate and initialize counting array for R(n)
@@ -34,7 +51,7 @@ arrayNumberType* calculateR_nArray(const BRepresentation& botBound, const BRepre
 	std::fill_n(RnArray, arraySize, 0);
 
 	// initialize
-	BRepresentation workRepresentation = minBound;
+	BRepresentation workRepresentation = actualMinBound;
 	BRepresentation topBRepresentation = topBound;
 	// count R(n) and report progress
 	size_t counter = 0;
@@ -50,9 +67,12 @@ arrayNumberType* calculateR_nArray(const BRepresentation& botBound, const BRepre
 	long long value;
 	while (workRepresentation <= topBRepresentation) // radix ordering here, not by value!!!
 	{
-		long long value = workRepresentation.toLongLong() - minWantedValue;
-		if(value >= 0 && value <= maxWantedValue) // ignore representations with value outside our interval
-			RnArray[value] += 1;
+		long long value = workRepresentation.toLongLong();
+		// ignore representations with value outside our interval
+		if (value >= minWantedValue && value <= maxWantedValue)
+		{
+			RnArray[value - minWantedValue] += 1;
+		}
 		workRepresentation.incrementRepresentationIgnoreGreedy();
 		if (counter == counter_period)
 		{
@@ -91,7 +111,7 @@ void writeR_nArrayToDisc(size_t arraySize, const BRepresentation& botBound, cons
 	// write to file with representations
 	for (size_t i = 0; i < arraySize; i++) // this range is enough!
 	{
-		RnArrayOutputFile << i + minReachableValue << "," << iBrepresentation << "," << RnArray[i] << std::endl;
+		RnArrayOutputFile << i + minReachableValue << "," << iBrepresentation << "," << int(RnArray[i]) << std::endl;
 		if (basisisF)
 			// increment with normalisation (so that we don't construct a new representation every time)
 			++iBrepresentation;
