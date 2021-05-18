@@ -38,7 +38,7 @@ public:
 	static digittype getAlphabetBiggestDigit() { return a; };
 	static int getBasisOrder() { return M; };
 
-	static const sequencetype getSequenceElement(int index) { return sequence[index]; };
+	static const sequencetype getBasisElement(int index) { return sequence[index]; };
 	static int addElementsByIndex(int maxElementIndex);
 	static int addElementsByValue(sequencetype maxValue);
 	
@@ -97,6 +97,7 @@ public:
 	friend void calculateR(BRepresentation topBound, BRepresentation botBound);
 	friend void calculateR_nToDiscOnBounds(BRepresentation botBound, BRepresentation topBound);
 	friend void calculateR_nMaxima(int representationLengthMin, int representationLengthMax, int outputNumberOfMaxima);
+	friend void calculateR_nCPUTimes(int representationLengthMin, int representationLengthMax);
 };
 
 // BINARY ARITHMETIC

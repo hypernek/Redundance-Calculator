@@ -24,9 +24,9 @@ arrayNumberType* calculateR_nArray(const BRepresentation& botBound, const BRepre
 	// (see Lemma 3.4)
 	size_t startValue;
 	BRepresentation actualMinBound;
-	if (minWantedValue != BRepresentation::getSequenceElement(botBound.getSize()) - 1)
+	if (minWantedValue != BRepresentation::getBasisElement(botBound.getSize()) - 1)
 	{
-		startValue = BRepresentation::getSequenceElement(botBound.getSize() - 1) - 1;
+		startValue = BRepresentation::getBasisElement(botBound.getSize() - 1) - 1;
 		actualMinBound = BRepresentation(startValue);
 	}
 	else
@@ -35,7 +35,7 @@ arrayNumberType* calculateR_nArray(const BRepresentation& botBound, const BRepre
 		actualMinBound = botBound;
 	}
 
-	
+	long long totalRepresentations = topBound.asStandardRepresentation() - actualMinBound.asStandardRepresentation();
 
 	std::cout << "R(n) will be calculated on these values:" << std::endl;
 	std::cout << "bottom bound B-representation: " << botBound << std::endl;
@@ -44,6 +44,9 @@ arrayNumberType* calculateR_nArray(const BRepresentation& botBound, const BRepre
 	std::cout << "maximum wanted n (DEC): " << maxWantedValue << std::endl;
 	std::cout << "minimum n we have to check (DEC): " << startValue << std::endl;
 	std::cout << "B-representation of this minimum: " << actualMinBound << std::endl;
+	std::cout << "Actual minimal representation b-ary value: "  << actualMinBound.asStandardRepresentation() << std::endl;
+	std::cout << "Maximal representation b-ary value: " << topBound.asStandardRepresentation() << std::endl;
+	std::cout << "=> Total number of representations to be covered: " <<  totalRepresentations << std::endl;;
 	std::cout << "array size: " << arraySize << " values ~ " << arraySizeMB << " MB of memory" << std::endl;
 
 	// allocate and initialize counting array for R(n)
@@ -321,10 +324,10 @@ void calculateR_nToDiscOnLengths(int representationLengthMin, int representation
 	std::cout << std::endl << std::endl << "STARTING CALCULATION OF R(n) ON LENGTHS " << representationLengthMin << "-" << representationLengthMax << std::endl;
 	BRepresentation botBound;
 	if (representationLengthMin > 1)
-		botBound = BRepresentation(BRepresentation::getSequenceElement(representationLengthMin - 1));
+		botBound = BRepresentation(BRepresentation::getBasisElement(representationLengthMin - 1));
 	else
 		botBound = BRepresentation(0); // we count zero as representation of length 1
-	BRepresentation topBound = BRepresentation(BRepresentation::getSequenceElement(representationLengthMax) - 1);
+	BRepresentation topBound = BRepresentation(BRepresentation::getBasisElement(representationLengthMax) - 1);
 	calculateR_nToDiscOnBounds(botBound, topBound);
 }
 
@@ -388,10 +391,10 @@ void calculateR_nMaxima(int representationLengthMin, int representationLengthMax
 		// (largest number of desired length & largest number of desired length-1)
 		std::cout << std::endl << std::endl << "STARTING R(n) ON LENGTH " << L <<
 			" (TOTAL RANGE: "<< representationLengthMin << "-" << representationLengthMax << ")" << std::endl;
-		BRepresentation topBound = BRepresentation(BRepresentation::getSequenceElement(L) - 1);
+		BRepresentation topBound = BRepresentation(BRepresentation::getBasisElement(L) - 1);
 		BRepresentation botBound;
 		if (L > 1)
-			botBound = BRepresentation(BRepresentation::getSequenceElement(L - 1));
+			botBound = BRepresentation(BRepresentation::getBasisElement(L - 1));
 		else
 			botBound = BRepresentation(0);
 		size_t arraySize = topBound.toLongLong() - botBound.toLongLong() + size_t(1);
@@ -460,5 +463,80 @@ void calculateR_nMaxima(int representationLengthMin, int representationLengthMax
 	MaximaOutputFile.close();
 	TimesOutputFile.close();
 	
+}
+
+void calculateCPUTime(unsigned long long minWantedValue, unsigned long long maxWantedValue,
+	unsigned long long* cpuTime)
+{
+	BRepresentation BR_n_min(minWantedValue);
+	BRepresentation BR_n_max(maxWantedValue);
+
+	// start clock
+	auto CPU_start = std::chrono::steady_clock::now();
+	auto end = std::chrono::steady_clock::now();
+
+	int* RnArray = calculateR_nArray<int>(minWantedValue, maxWantedValue);
+
+	end = std::chrono::steady_clock::now();
+	auto CPU_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - CPU_start).count();
+	std::cout << "Time needed for calculating R(n) by CPU: " << CPU_time << " ms" << std::endl;
+
+	*cpuTime = CPU_time;
+
+	//// restart clock
+	//auto CPU_start = std::chrono::steady_clock::now();
+
+
+	//end = std::chrono::steady_clock::now();
+	//auto CPU_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - CPU_start).count();
+	//std::cout << "Time needed for calculating R(n) by CPU: " << CPU_time << " ms" << std::endl;
+
+	//*cpuTime = CPU_time;
+
+}
+
+void calculateR_nCPUTimes(int representationLengthMin, int representationLengthMax)
+{
+
+	// pregenerate needed sequence elements
+	BRepresentation::addElementsByIndex(representationLengthMax + 1);
+
+	// prepare output files
+	std::stringstream infoFilename;
+
+	infoFilename << "CPU_times_";
+	for (int i = 0; i < BRepresentation::coefficients.size() - 1; i++)
+		infoFilename << BRepresentation::coefficients[i] << ",";
+	infoFilename << BRepresentation::coefficients[BRepresentation::coefficients.size() - 1];
+	infoFilename << "_L-" << representationLengthMin << "-" << representationLengthMax << "_info.csv";
+	std::ofstream TimesOutputFile(infoFilename.str());
+
+	// write column titles
+	TimesOutputFile << "length,array size,array size (MB),CPU time (ms)" << std::endl;
+
+	unsigned long long cpuTime;
+
+	for (int L = representationLengthMin; L <= representationLengthMax; L++)
+	{
+		// prepare bounds 
+		// (largest number of desired length & largest number of desired length-1)
+		std::cout << std::endl << std::endl << "STARTING R(n) ON LENGTH " << L <<
+			" (TOTAL RANGE: " << representationLengthMin << "-" << representationLengthMax << ")" << std::endl;
+		BRepresentation topBound = BRepresentation(BRepresentation::getBasisElement(L) - 1);
+		BRepresentation botBound;
+		if (L > 1)
+			botBound = BRepresentation(BRepresentation::getBasisElement(L - 1));
+		else
+			botBound = BRepresentation(0);
+		size_t arraySize = topBound.toLongLong() - botBound.toLongLong() + size_t(1);
+		double arraySizeMB = arraySize * sizeof(int) * 0.000001;
+
+		calculateCPUTime(botBound.toLongLong(), topBound.toLongLong(), &cpuTime);
+
+		TimesOutputFile << L << "," << arraySize << "," << arraySizeMB << "," << cpuTime << std::endl;
+	}
+
+	std::cout << "Calculation information saved to " << infoFilename.str() << std::endl;
+	TimesOutputFile.close();
 }
 

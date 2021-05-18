@@ -365,3 +365,4 @@ FodyWeavers.xsd
 
 # ignore data files
 *.csv
+*.ods

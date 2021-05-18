@@ -28,7 +28,9 @@ void calculateR_nToDiscOnLengths(int representationLengthMin, int representation
 // calculate maxima of R(n) straight away without saving R(n) to disc
 void calculateR_nMaxima(int representationLengthMin, int representationLengthMax, int outputNumberOfMaxima);
 
-
-
+// calculate R(n) but don't save to disk, save only calculation time
+void calculateCPUTime(unsigned long long minWantedValue, unsigned long long maxWantedValue,
+	unsigned long long* cpuTime);
+void calculateR_nCPUTimes(int representationLengthMin, int representationLengthMax);
 
 #endif // REDUNDANCE_H

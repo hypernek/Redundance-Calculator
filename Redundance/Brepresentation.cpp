@@ -651,14 +651,9 @@ long long BRepresentation::asStandardRepresentation() const
 	// return a number as if this was a standard representation in base a
 	long long result = 0;
 	// (F) system has the same digits as the a+1-ary system
-	long long base = a + 1; 
-	int i = size - 1;
-	result += digits[i];
-	for (; i > 0; i--)
-	{
-		result = result * base;
-		result += digits[i];
-	}
+	long long b = (long long)a + 1;
+	for (int i = size - 1; i >= 0; i--)
+		result = result * b + digits[i];
 	return result;
 }
 
